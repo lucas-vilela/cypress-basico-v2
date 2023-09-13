@@ -13,12 +13,19 @@ describe('Central de atendimento ao cliente TAT', function () {
     })
 
     it('Preenche obrigatórios e envia com sucesso', function () {
+
+        cy.clock() // congela o relógio do navegador
+
         cy.get('#firstName').type('Lucas').should('contain.value', 'Lucas')
         cy.get('#lastName').type('Vilela').should('contain.value', 'Vilela')
         cy.get('#email').type('vilelalucas500@gmail.com').should('contain.value', 'vilelalucas500@gmail.com')
-        cy.get('#open-text-area').type('Teste', { delay: 1000 }).should('contain.value', 'Teste')
+        cy.get('#open-text-area').type('Teste', { delay: 0 }).should('contain.value', 'Teste')
         cy.contains('button', 'Enviar').click()
         cy.get('.success > strong').should('be.visible')
+
+        cy.tick(3000)
+
+        cy.get('.success > strong').should('not.be.visible')
     })
 
     it('Preenche obrigatórios e envia com erro no email', function () {
@@ -151,6 +158,46 @@ describe('Central de atendimento ao cliente TAT', function () {
         cy.contains('Talking About Testing').should('be.visible')
     })
 
-    
+    it('exibe e esconde as mensagens de sucesso e erro usando o .invoke()', () => {
+        cy.get('.success')
+            .should('not.be.visible')
+            .invoke('show')
+            .should('be.visible')
+            .and('contain', 'Mensagem enviada com sucesso.')
+            .invoke('hide')
+            .should('not.be.visible')
+        cy.get('.error')
+            .should('not.be.visible')
+            .invoke('show')
+            .should('be.visible')
+            .and('contain', 'Valide os campos obrigatórios!')
+            .invoke('hide')
+            .should('not.be.visible')
+    });
+
+    it('preenche a area de texto usando o comando invoke', () => {
+        const long_text = Cypress._.repeat('Lorem Ipsum ', 10)
+
+        cy.get('#open-text-area')
+            .invoke('val', long_text)
+            .should('have.value', long_text)
+    });
+
+    it('faz uma requisição HTTP', () => {
+        cy.request('https://cac-tat.s3.eu-central-1.amazonaws.com/index.html')
+            .should((response) => {
+                const { status, statusText, body } = response
+                expect(status).to.equal(200)
+                expect(statusText).to.equal('OK')
+                expect(body).to.include('CAC TAT')
+
+            })
+    });
+
+    it.only('cat', () => {
+        cy.get('#cat')
+            .invoke('show')
+            .should('be.visible')
+    });
 
 })
