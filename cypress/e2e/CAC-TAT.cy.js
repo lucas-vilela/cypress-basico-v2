@@ -194,7 +194,7 @@ describe('Central de atendimento ao cliente TAT', function () {
             })
     });
 
-    it.only('cat', () => {
+    it('cat', () => {
         cy.get('#cat')
             .invoke('show')
             .should('be.visible')
